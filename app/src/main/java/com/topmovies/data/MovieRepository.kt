@@ -6,26 +6,37 @@ import com.topmovies.data.remote.MovieRemoteDataSource
 import com.topmovies.utils.Resource
 
 class MovieRepository(
-    private val movieRemoteDataSource: MovieRemoteDataSource,
-    private val movieLocalDataSource: MovieLocalDataSource
+    val movieRemoteDataSource: MovieRemoteDataSource,
+    val movieLocalDataSource: MovieLocalDataSource
 ) {
     suspend fun getTopRatedMovie(): Resource<List<MovieEntity>> {
-        val remoteDataSource = movieRemoteDataSource.getTopRatedMovies()
-        return if (remoteDataSource is Resource.Success) {
-            movieLocalDataSource.saveListMovie(remoteDataSource.data)
-            remoteDataSource
+        val localDataSource = movieLocalDataSource.getTopRatedMovies()
+        return if (localDataSource is Resource.Success) {
+            localDataSource
         } else {
-            movieLocalDataSource.getTopRatedMovies() ?: remoteDataSource!!
+            val remoteDataSource = movieRemoteDataSource.getTopRatedMovies()
+            return if (remoteDataSource is Resource.Success) {
+                movieLocalDataSource.saveListMovie(remoteDataSource.data)
+                remoteDataSource
+            } else {
+                remoteDataSource!!
+            }
         }
+
     }
 
     suspend fun getMovie(movieId: String): Resource<MovieEntity> {
-        val remoteDataSource = movieRemoteDataSource.getMovie(movieId)
-        return if (remoteDataSource is Resource.Success) {
-            movieLocalDataSource.saveMovie(remoteDataSource.data)
-            remoteDataSource
+        val localDataSource = movieLocalDataSource.getMovie(movieId)
+        return if (localDataSource is Resource.Success) {
+            localDataSource
         } else {
-            movieLocalDataSource.getMovie(movieId) ?: remoteDataSource!!
+            val remoteDataSource = movieRemoteDataSource.getMovie(movieId)
+            return if (remoteDataSource is Resource.Success) {
+                movieLocalDataSource.saveMovie(remoteDataSource.data)
+                remoteDataSource
+            } else {
+                remoteDataSource!!
+            }
         }
     }
 }

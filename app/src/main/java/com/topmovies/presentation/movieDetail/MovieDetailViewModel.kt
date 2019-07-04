@@ -1,47 +1,45 @@
-package com.topmovies.presentation.movieList
+package com.topmovies.presentation.movieDetail
 
 import android.app.Application
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.room.Ignore
 import com.topmovies.domain.model.Movie
 import com.topmovies.domain.usecase.MovieUseCase
 import com.topmovies.presentation.BaseViewModel
 import com.topmovies.utils.Resource
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
-class MovieListViewModel(
+class MovieDetailViewModel(
     val context: Application,
     val movieUseCase: MovieUseCase,
     val coroutineContext: CoroutineContext
 ): BaseViewModel(context, coroutineContext) {
 
-    val snackbar: MutableLiveData<String> = MutableLiveData()
     val loading: MutableLiveData<Boolean> = MutableLiveData(false)
-    val movieList: MutableLiveData<List<Movie>> = MutableLiveData()
+    var movie: Movie? = null
+    val title: MutableLiveData<String> = MutableLiveData()
+    val description: MutableLiveData<String> = MutableLiveData()
+    val backdropPath: MutableLiveData<String> = MutableLiveData()
+    val snackBar: MutableLiveData<String> = MutableLiveData()
 
-    fun getMovieList() {
+    fun getMovie(movieId: String) {
         viewModelScope.launch {
             loading.postValue(true)
-            movieListCallBack(movieUseCase.getTopRatedMovie())
+            getMovieCallBack(movieUseCase.getMovie(movieId))
         }
     }
 
-    private fun movieListCallBack(resource: Resource<List<Movie>>) {
+    private fun getMovieCallBack(resource: Resource<Movie>) {
         loading.postValue(false)
         when (resource) {
             is Resource.Success -> {
-                val list = resource.data
-                if (list.isNotEmpty()) {
-                    movieList.postValue(list)
-                } else {
-                    getMovieList()
-                }
+                movie = resource.data
+                title.postValue(movie!!.title)
+                description.postValue(movie!!.overview)
+                backdropPath.postValue(movie!!.backdropPath)
             }
             is Resource.Error -> {
-                snackbar.postValue(resource.error)
+                snackBar.postValue(resource.error)
             }
         }
     }

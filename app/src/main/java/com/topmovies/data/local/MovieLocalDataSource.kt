@@ -6,7 +6,7 @@ import com.topmovies.utils.Resource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class MovieLocalDataSource(private val movieDao: MovieDao): MovieDataSource {
+class MovieLocalDataSource(val movieDao: MovieDao): MovieDataSource {
     suspend fun saveMovie(movieEntity: MovieEntity) =
         withContext(Dispatchers.IO) {
             movieDao.insert(movieEntity)
