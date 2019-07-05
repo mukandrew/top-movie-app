@@ -8,12 +8,14 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.topmovies.R
+import com.topmovies.data.entity.MovieEntity
 import com.topmovies.domain.model.Movie
+import com.topmovies.utils.imageDownload
 
-class MovieItemAdapter(var movies: List<Movie>, private val listener: OnItemClickListener) : RecyclerView.Adapter<MovieItemAdapter.MovieItemViewHolder>() {
+class MovieItemAdapter(var movies: List<MovieEntity>, private val listener: OnItemClickListener) : RecyclerView.Adapter<MovieItemAdapter.MovieItemViewHolder>() {
 
     interface OnItemClickListener {
-        fun onItemClick(movie: Movie)
+        fun onItemClick(movie: MovieEntity)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MovieItemViewHolder {
@@ -26,10 +28,7 @@ class MovieItemAdapter(var movies: List<Movie>, private val listener: OnItemClic
     override fun onBindViewHolder(holder: MovieItemViewHolder, position: Int) {
         val movie = movies[position]
         holder.title.text = movie.title
-        Glide
-            .with(holder.card)
-            .load("https://image.tmdb.org/t/p/w500${movie.backdropPath}")
-            .into(holder.banner)
+        imageDownload(holder.card, movie.backdropPath, holder.banner)
         holder.bindClickListener(listener, movie)
     }
 
@@ -42,7 +41,7 @@ class MovieItemAdapter(var movies: List<Movie>, private val listener: OnItemClic
         internal var title: TextView = itemView.findViewById(R.id.movieItemTitle)
         internal var banner: ImageView = itemView.findViewById(R.id.movieItemBanner)
 
-        fun bindClickListener(listener: OnItemClickListener, movie: Movie) {
+        fun bindClickListener(listener: OnItemClickListener, movie: MovieEntity) {
             itemView.setOnClickListener { listener.onItemClick(movie) }
         }
     }

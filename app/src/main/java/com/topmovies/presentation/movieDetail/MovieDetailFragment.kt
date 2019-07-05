@@ -6,14 +6,13 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
-import com.bumptech.glide.Glide
 import com.google.android.material.snackbar.Snackbar
 import com.topmovies.R
+import com.topmovies.utils.imageDownload
 import kotlinx.android.synthetic.main.fragment_movie_detail.*
 import org.koin.android.viewmodel.ext.android.viewModel
 
 class MovieDetailFragment: Fragment() {
-
     private val viewModel by viewModel<MovieDetailViewModel>()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -22,8 +21,6 @@ class MovieDetailFragment: Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        activity?.title = "Movie"
         initData()
     }
 
@@ -37,7 +34,7 @@ class MovieDetailFragment: Fragment() {
             title.observe(this@MovieDetailFragment, Observer(::setMovieTitle))
             description.observe(this@MovieDetailFragment, Observer(::setMovieDescription))
             backdropPath.observe(this@MovieDetailFragment, Observer(::setBackdropImage))
-            snackBar.observe(this@MovieDetailFragment, Observer(::setMessageError))
+            messageError.observe(this@MovieDetailFragment, Observer(::setMessageError))
         }
     }
 
@@ -55,10 +52,7 @@ class MovieDetailFragment: Fragment() {
     }
 
     private fun setBackdropImage(path: String) {
-        Glide
-            .with(fragmentMovieDetail)
-            .load("https://image.tmdb.org/t/p/w500$path")
-            .into(movieDetailBanner)
+        imageDownload(fragmentMovieDetail, path, movieDetailBanner)
     }
 
     private fun setMessageError(message: String) {

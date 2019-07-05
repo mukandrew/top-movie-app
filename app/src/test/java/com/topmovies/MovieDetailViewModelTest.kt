@@ -60,7 +60,7 @@ class MovieDetailViewModelTest {
 
         movieDetailViewModel = MovieDetailViewModel(context, mockMovieUseCase, Dispatchers.Default)
         with(movieDetailViewModel) {
-            snackBar.observeForever(snackBarTest)
+            messageError.observeForever(snackBarTest)
             loading.observeForever(loadingTest)
             title.observeForever(titleTest)
             description.observeForever(descriptionTest)

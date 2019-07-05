@@ -10,12 +10,12 @@ import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
 import com.topmovies.R
+import com.topmovies.data.entity.MovieEntity
 import com.topmovies.domain.model.Movie
 import kotlinx.android.synthetic.main.fragment_movie_list.*
 import org.koin.android.viewmodel.ext.android.viewModel
 
-class MovieListFragment: Fragment() {
-
+class MovieListFragment : Fragment() {
     private val viewModel by viewModel<MovieListViewModel>()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -24,13 +24,9 @@ class MovieListFragment: Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        activity?.title = "Top Rated Movies"
-
         movieListRecyclerView.setHasFixedSize(true)
         movieListRecyclerView.adapter = MovieItemAdapter(listOf(), onClickMovie)
         movieListRecyclerView.layoutManager = LinearLayoutManager(activity)
-
         initData()
     }
 
@@ -39,7 +35,7 @@ class MovieListFragment: Fragment() {
         viewModel.apply {
             movieList.observe(this@MovieListFragment, Observer(::setRecyclerView))
             loading.observe(this@MovieListFragment, Observer(::showHideLoading))
-            snackbar.observe(this@MovieListFragment, Observer(::showMessageError))
+            messageError.observe(this@MovieListFragment, Observer(::showMessageError))
         }
     }
 
@@ -47,7 +43,7 @@ class MovieListFragment: Fragment() {
         movieListLoading.visibility = if (state) View.VISIBLE else View.GONE
     }
 
-    private fun setRecyclerView(movieList: List<Movie>) {
+    private fun setRecyclerView(movieList: List<MovieEntity>) {
         (movieListRecyclerView.adapter as MovieItemAdapter).movies = movieList
         (movieListRecyclerView.adapter as MovieItemAdapter).notifyDataSetChanged()
     }
@@ -57,7 +53,7 @@ class MovieListFragment: Fragment() {
     }
 
     private val onClickMovie = object : MovieItemAdapter.OnItemClickListener {
-        override fun onItemClick(movie: Movie) {
+        override fun onItemClick(movie: MovieEntity) {
             val navigation = Navigation.findNavController(activity!!, R.id.mainNavigation)
             val action = MovieListFragmentDirections.actionMovieListFragmentToMovieDetailFragment()
             action.movieId = movie.id.toString()

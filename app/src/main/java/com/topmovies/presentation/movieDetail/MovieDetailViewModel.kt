@@ -2,7 +2,7 @@ package com.topmovies.presentation.movieDetail
 
 import android.app.Application
 import androidx.lifecycle.MutableLiveData
-import com.topmovies.domain.model.Movie
+import com.topmovies.data.entity.MovieEntity
 import com.topmovies.domain.usecase.MovieUseCase
 import com.topmovies.presentation.BaseViewModel
 import com.topmovies.utils.Resource
@@ -10,17 +10,16 @@ import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 
 class MovieDetailViewModel(
-    val context: Application,
-    val movieUseCase: MovieUseCase,
-    val coroutineContext: CoroutineContext
+    context: Application,
+    private val movieUseCase: MovieUseCase,
+    coroutineContext: CoroutineContext
 ): BaseViewModel(context, coroutineContext) {
 
     val loading: MutableLiveData<Boolean> = MutableLiveData(false)
-    var movie: Movie? = null
     val title: MutableLiveData<String> = MutableLiveData()
     val description: MutableLiveData<String> = MutableLiveData()
     val backdropPath: MutableLiveData<String> = MutableLiveData()
-    val snackBar: MutableLiveData<String> = MutableLiveData()
+    val messageError: MutableLiveData<String> = MutableLiveData()
 
     fun getMovie(movieId: String) {
         viewModelScope.launch {
@@ -29,18 +28,17 @@ class MovieDetailViewModel(
         }
     }
 
-    private fun getMovieCallBack(resource: Resource<Movie>) {
+    private fun getMovieCallBack(resource: Resource<MovieEntity>) {
         loading.postValue(false)
         when (resource) {
-            is Resource.Success -> {
-                movie = resource.data
-                title.postValue(movie!!.title)
-                description.postValue(movie!!.overview)
-                backdropPath.postValue(movie!!.backdropPath)
-            }
-            is Resource.Error -> {
-                snackBar.postValue(resource.error)
-            }
+            is Resource.Success -> postSuccess(resource.data)
+            is Resource.Error -> messageError.postValue(resource.error)
         }
+    }
+
+    private fun postSuccess(movie: MovieEntity) {
+        title.postValue(movie.title)
+        description.postValue(movie.overview)
+        backdropPath.postValue(movie.backdropPath)
     }
 }

@@ -6,37 +6,33 @@ import com.topmovies.data.remote.MovieRemoteDataSource
 import com.topmovies.utils.Resource
 
 class MovieRepository(
-    val movieRemoteDataSource: MovieRemoteDataSource,
-    val movieLocalDataSource: MovieLocalDataSource
+    private val movieRemoteDataSource: MovieRemoteDataSource,
+    private val movieLocalDataSource: MovieLocalDataSource
 ) {
     suspend fun getTopRatedMovie(): Resource<List<MovieEntity>> {
-        val localDataSource = movieLocalDataSource.getTopRatedMovies()
-        return if (localDataSource is Resource.Success) {
-            localDataSource
-        } else {
-            val remoteDataSource = movieRemoteDataSource.getTopRatedMovies()
-            return if (remoteDataSource is Resource.Success) {
-                movieLocalDataSource.saveListMovie(remoteDataSource.data)
-                remoteDataSource
-            } else {
-                remoteDataSource!!
-            }
-        }
-
+        val topRatedMovies = movieLocalDataSource.getTopRatedMovies()
+        return if (topRatedMovies.isNotEmpty()) Resource.Success(topRatedMovies) else getMovieListRemote()
     }
 
-    suspend fun getMovie(movieId: String): Resource<MovieEntity> {
-        val localDataSource = movieLocalDataSource.getMovie(movieId)
-        return if (localDataSource is Resource.Success) {
-            localDataSource
-        } else {
-            val remoteDataSource = movieRemoteDataSource.getMovie(movieId)
-            return if (remoteDataSource is Resource.Success) {
-                movieLocalDataSource.saveMovie(remoteDataSource.data)
-                remoteDataSource
-            } else {
-                remoteDataSource!!
+    private suspend fun getMovieListRemote(): Resource<List<MovieEntity>> =
+        when (val topMoviesResource = movieRemoteDataSource.getTopRatedMovies()) {
+            is Resource.Success -> {
+                movieLocalDataSource.saveListMovie(topMoviesResource.data)
+                topMoviesResource
             }
+            is Resource.Error -> topMoviesResource
         }
+
+    suspend fun getMovie(movieId: String): Resource<MovieEntity> {
+        val movie = movieLocalDataSource.getMovie(movieId)
+        return if (movie != null) Resource.Success(movie) else getMovieRemote(movieId)
+    }
+
+    private suspend fun getMovieRemote(movieId: String): Resource<MovieEntity> {
+        val movieResource = movieRemoteDataSource.getMovie(movieId)
+        if (movieResource is Resource.Success) {
+            movieLocalDataSource.saveMovie(movieResource.data)
+        }
+        return movieResource
     }
 }

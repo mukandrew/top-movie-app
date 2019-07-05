@@ -55,7 +55,7 @@ class MovieListViewModelTest {
 
         movieListViewModel = MovieListViewModel(context, mockMovieUseCase, Dispatchers.Default)
         with(movieListViewModel) {
-            snackbar.observeForever(snackbarTest)
+            messageError.observeForever(snackbarTest)
             loading.observeForever(loadingTest)
             movieList.observeForever(movieListTest)
         }

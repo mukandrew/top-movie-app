@@ -58,6 +58,8 @@ class MovieEntityTest {
         appDataBase.close()
     }
 
+
+
     @Test
     fun ioDB() = runBlocking {
         movieDao.insert(MOVIE_DETAIL_DATA)

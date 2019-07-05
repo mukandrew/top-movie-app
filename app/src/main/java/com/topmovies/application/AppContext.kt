@@ -6,7 +6,7 @@ import com.topmovies.application.KoinModules.mainModule
 import com.topmovies.application.KoinModules.movieModule
 import org.koin.android.ext.android.startKoin
 
-class AppContext: Application() {
+class AppContext : Application() {
     companion object {
         lateinit var instance: AppContext
             private set
